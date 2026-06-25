@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>運動タイプ診断 ｜ あなたの身体のサインを読み解く</title>
+<meta name="description" content="16の問いと基本情報から、筋骨格・心肺・認知の3軸であなたの運動タイプを可視化。8タイプ別の1週間プランを提案します。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --paper:#e7ebe7;
+  --card:#fbfcfb;
+  --card-2:#f1f4f1;
+  --line:#d4dad4;
+  --line-strong:#b6bfb6;
+  --ink:#172019;
+  --ink-2:#445049;
+  --ink-3:#7c867f;
+  --vital:#1f6f50;
+  --vital-deep:#15543c;
+  --vital-soft:#e3efe9;
+  --signal:#d8593b;
+  --axis-body:#b07a2e;
+  --axis-stamina:#1f6f50;
+  --axis-mind:#5b5ba6;
+  --line-brand:#06c755;
+  --serif:"Zen Old Mincho",serif;
+  --sans:"Zen Kaku Gothic New",system-ui,sans-serif;
+  --mono:"Roboto Mono",ui-monospace,monospace;
+  --r:14px;
+  --r-sm:9px;
+  --shadow:0 18px 50px -24px rgba(23,32,25,.45);
+  --shadow-sm:0 2px 10px -4px rgba(23,32,25,.25);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:var(--sans);
+  color:var(--ink);
+  background: radial-gradient(120% 90% at 50% -10%, #eef1ee 0%, var(--paper) 55%) fixed;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  display:flex;align-items:center;justify-content:center;
+  padding:clamp(0px,3vw,28px);
+}
+button{font-family:inherit;cursor:pointer;}
+:focus-visible{outline:2.5px solid var(--vital);outline-offset:3px;border-radius:6px;}
+
+.app{
+  position:relative;
+  width:100%;max-width:1000px;
+  min-height:min(92vh,860px);
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:clamp(0px,2vw,26px);
+  box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+@media (max-width:640px){
+  body{padding:0;}
+  .app{min-height:100svh;border-radius:0;border-left:0;border-right:0;}
+}
+
+.trace{
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--line);z-index:6;opacity:0;transition:opacity .3s;
+}
+.trace[data-on="1"]{opacity:1;}
+.trace__fill{height:100%;width:0;background:linear-gradient(90deg,var(--vital),var(--vital-deep)); transition:width .5s var(--ease);}
+
+.ecg{
+  position:absolute;left:0;right:0;bottom:0;height:54px;
+  pointer-events:none;opacity:.5;z-index:0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+}
+.ecg path{
+  fill:none;stroke:var(--vital);stroke-width:1.6;opacity:.55;
+  stroke-dasharray:1400;stroke-dashoffset:1400;
+  animation:ecgDraw 4.5s linear infinite;
+}
+@keyframes ecgDraw{
+  0%{stroke-dashoffset:1400;}
+  60%,100%{stroke-dashoffset:0;}
+}
+
+.stage{
+  position:relative;z-index:1;
+  flex:1;display:flex;flex-direction:column;
+  padding:clamp(22px,4.5vw,56px);
+  overflow-y:auto;overflow-x:hidden;
+}
+.center{margin:auto;width:100%;}
+
+.enter{opacity:0;transform:translateY(14px);}
+.enter-active{opacity:1;transform:none;transition:opacity .5s var(--ease),transform .5s var(--ease);}
+.exit-active{opacity:0;transform:translateY(-10px);transition:opacity .35s var(--ease),transform .35s var(--ease);}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:.55em;
+  font-family:var(--mono);font-size:.72rem;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--vital);
+}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--vital);opacity:.6;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.6em;
+  font-weight:700;font-size:1.02rem;line-height:1;
+  padding:1.05em 2em;border-radius:999px;border:0;
+  background:var(--vital);color:#fff;
+  box-shadow:0 10px 24px -12px rgba(31,111,80,.8);
+  transition:transform .18s var(--ease),background .18s,box-shadow .18s;
+}
+.btn:hover{background:var(--vital-deep);transform:translateY(-2px);box-shadow:0 16px 30px -14px rgba(31,111,80,.9);}
+.btn:active{transform:translateY(0);}
+.btn svg{width:18px;height:18px;}
+
+.btn-ghost{
+  background:transparent;color:var(--ink-2);border:1.5px solid var(--line-strong);
+  box-shadow:none;font-weight:700;
+}
+.btn-ghost:hover{background:var(--card-2);color:var(--ink);transform:translateY(-1px);}
+
+.linkback{
+  display:inline-flex;align-items:center;gap:.4em;
+  background:none;border:0;color:var(--ink-3);font-weight:500;font-size:.9rem;padding:.4em .2em;
+}
+.linkback:hover{color:var(--ink);}
+.linkback svg{width:15px;height:15px;}
+
+.hero{max-width:640px;margin:auto;text-align:center;}
+.hero__title{
+  font-family:var(--serif);font-weight:900;
+  font-size:clamp(1.7rem,6.6vw,4rem);line-height:1.18;
+  letter-spacing:.01em;margin:.6em 0 .5em;color:var(--ink);
+}
+.hero__title .l1{white-space:nowrap;}
+.hero__title em{font-style:normal;color:var(--vital);display:block;}
+.hero__lead{
+  color:var(--ink-2);font-size:clamp(.95rem,2.4vw,1.08rem);line-height:1.95;
+  margin:0 auto 2.4em;max-width:38em;
+}
+.hero__meta{
+  display:flex;gap:1.6rem;justify-content:center;flex-wrap:wrap;
+  margin-top:2.6em;color:var(--ink-3);font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;
+}
+.hero__meta span{display:inline-flex;align-items:center;gap:.5em;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--vital);}
+
+.form-head{text-align:center;margin-bottom:2.2em;}
+.form-head h2{font-family:var(--serif);font-weight:700;font-size:clamp(1.5rem,4vw,2rem);margin:.4em 0 .3em;}
+.form-head p{color:var(--ink-3);font-size:.9rem;margin:0;}
+.card{
+  background:var(--card-2);border:1px solid var(--line);border-radius:var(--r);
+  padding:clamp(20px,4vw,34px);max-width:560px;margin:0 auto;
+}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem 1.3rem;}
+.field{display:flex;flex-direction:column;gap:.5em;margin-bottom:1.3rem;}
+.field:last-of-type{margin-bottom:0;}
+.field label{font-size:.82rem;font-weight:700;color:var(--ink-2);letter-spacing:.02em;}
+.field .wrap{position:relative;}
+.field input,.field select{
+  width:100%;font-family:var(--sans);font-size:1.05rem;color:var(--ink);
+  background:var(--card);border:0;border-bottom:1.5px solid var(--line-strong);
+  border-radius:var(--r-sm) var(--r-sm) 0 0;
+  padding:.85em .9em;transition:border-color .2s,background .2s,box-shadow .2s;
+  appearance:none;-webkit-appearance:none;
+}
+.field input:focus,.field select:focus{
+  outline:none;border-bottom-color:var(--vital);
+  background:#fff;box-shadow:0 6px 14px -10px rgba(31,111,80,.5);
+}
+.field select{cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237c867f' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .9em center;padding-right:2.4em;}
+.field .unit{position:absolute;right:.9em;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:.9rem;pointer-events:none;}
+.field input[type=number]::-webkit-inner-spin-button{margin-left:.6em;}
+.form-foot{margin-top:1.8rem;display:flex;flex-direction:column;gap:1rem;align-items:center;}
+.form-foot .btn{width:100%;}
+
+.q-wrap{max-width:680px;margin:auto;width:100%;}
+.q-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.6rem;}
+.q-count{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--ink);}
+.q-count b{font-size:1.7rem;color:var(--vital);}
+.q-count span{color:var(--ink-3);}
+.q-tag{
+  font-size:.72rem;font-weight:700;color:var(--ink-2);
+  background:var(--card-2);border:1px solid var(--line);
+  padding:.45em .85em;border-radius:999px;letter-spacing:.03em;
+}
+.q-text{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(1.35rem,4vw,1.95rem);line-height:1.7;
+  margin:0 0 2rem;min-height:2.4em;
+}
+.scale{margin-top:.5rem;}
+.scale__poles{display:flex;justify-content:space-between;font-size:.78rem;color:var(--ink-3);font-weight:500;margin-bottom:.7rem;padding:0 2px;}
+.scale__row{display:flex;gap:clamp(8px,2.4vw,18px);justify-content:center;align-items:center;}
+.opt{
+  position:relative;flex:1;max-width:96px;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--card);border:1.5px solid var(--line-strong);border-radius:50%;
+  transition:transform .16s var(--ease),border-color .16s,background .16s,box-shadow .16s;
+}
+.opt::after{content:"";width:42%;height:42%;border-radius:50%;background:transparent;transition:background .16s,transform .16s;}
+.opt:hover,.opt:focus-visible{border-color:var(--vital);transform:translateY(-3px);box-shadow:var(--shadow-sm);}
+.opt:hover::after,.opt:focus-visible::after{background:var(--vital-soft);transform:scale(1.05);}
+.opt[data-v="5"],.opt[data-v="1"]{aspect-ratio:1;}
+.opt[data-v="1"]{transform:scale(.78);} .opt[data-v="2"]{transform:scale(.89);}
+.opt[data-v="3"]{transform:scale(.96);} .opt[data-v="4"]{transform:scale(1.04);}
+.opt[data-v="5"]{transform:scale(1.12);}
+.opt[data-v="1"]:hover,.opt[data-v="1"]:focus-visible{transform:scale(.78) translateY(-3px);}
+.opt[data-v="2"]:hover,.opt[data-v="2"]:focus-visible{transform:scale(.89) translateY(-3px);}
+.opt[data-v="3"]:hover,.opt[data-v="3"]:focus-visible{transform:scale(.96) translateY(-3px);}
+.opt[data-v="4"]:hover,.opt[data-v="4"]:focus-visible{transform:scale(1.04) translateY(-3px);}
+.opt[data-v="5"]:hover,.opt[data-v="5"]:focus-visible{transform:scale(1.12) translateY(-3px);}
+.opt[data-v="5"]{border-color:var(--vital);} .opt[data-v="5"]::after{background:var(--vital-soft);}
+.opt__key{position:absolute;bottom:-1.7em;font-family:var(--mono);font-size:.68rem;color:var(--ink-3);}
+.scale__hint{text-align:center;margin-top:2.6rem;color:var(--ink-3);font-size:.78rem;}
+.scale__hint kbd{font-family:var(--mono);background:var(--card-2);border:1px solid var(--line);border-radius:5px;padding:.1em .5em;font-size:.72rem;color:var(--ink-2);}
+.q-foot{margin-top:2.4rem;display:flex;justify-content:center;}
+
+.analyze{text-align:center;margin:auto;}
+.analyze__ring{
+  width:74px;height:74px;margin:0 auto 1.8rem;border-radius:50%;
+  border:3px solid var(--line);border-top-color:var(--vital);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.analyze h2{font-family:var(--serif);font-weight:700;font-size:1.5rem;margin:0 0 .5rem;}
+.analyze p{color:var(--ink-3);font-size:.9rem;margin:0;}
+
+.report{max-width:880px;margin:0 auto;width:100%;}
+.sheet{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow-sm);overflow:hidden;
+}
+.sheet__head{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap;
+  padding:clamp(20px,3.5vw,30px) clamp(20px,4vw,34px);
+  border-bottom:2px solid var(--ink);
+}
+.sheet__head h1{font-family:var(--serif);font-weight:900;font-size:clamp(1.5rem,4vw,2.1rem);margin:.15em 0 0;letter-spacing:.06em;}
+.sheet__head .sub{font-family:var(--mono);font-size:.72rem;color:var(--ink-3);letter-spacing:.18em;}
+.sheet__meta-r{text-align:right;font-family:var(--mono);font-size:.72rem;color:var(--ink-3);line-height:1.7;}
+
+.vitals{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:1px;
+  background:var(--line);border-bottom:1px solid var(--line);
+}
+.vitals div{background:var(--card-2);padding:.95rem 1rem;}
+.vitals .k{font-size:.68rem;color:var(--ink-3);font-weight:700;letter-spacing:.04em;}
+.vitals .v{font-family:var(--mono);font-weight:700;font-size:1.2rem;margin-top:.15em;}
+.vitals .v small{font-size:.7rem;font-weight:500;color:var(--ink-3);}
+
+/* BMI Visual Indicator Styles */
+.bmi-section {
+  padding: 22px clamp(20px, 4vw, 34px);
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+}
+.bmi-label-container {
+  display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;
+}
+.bmi-title { font-size: 0.85rem; font-weight: 700; color: var(--ink-2); }
+.bmi-value-display { font-family: var(--mono); font-weight: 700; font-size: 1.3rem; color: var(--ink); }
+.bmi-gauge-wrapper { position: relative; padding: 18px 0 25px; }
+.bmi-bar-track {
+  height: 8px; border-radius: 99px;
+  background: linear-gradient(90deg, #5b5ba6 0%, #a4b7e1 22%, #1f6f50 25%, #1f6f50 55%, #e0a34c 60%, #d8593b 100%);
+}
+.bmi-pin-indicator {
+  position: absolute; top: 12px; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; transition: left 1s var(--ease);
+}
+.bmi-pin-dot { width: 4px; height: 20px; background: var(--ink); border-radius: 2px; }
+.bmi-pin-lbl {
+  margin-top: 4px; font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+  background: var(--ink); color: #fff; padding: 2px 7px; border-radius: 4px; box-shadow: var(--shadow-sm);
+}
+.bmi-bar-labels {
+  display: flex; justify-content: space-between; font-size: 0.68rem; font-weight: 700; color: var(--ink-3); margin-top: 6px; padding: 0 4px;
+}
+
+.diag{
+  display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(20px,4vw,40px);
+  padding:clamp(22px,4vw,36px);align-items:center;
+}
+.diag__type .chip{
+  display:inline-block;font-family:var(--mono);font-size:.7rem;font-weight:500;letter-spacing:.16em;
+  color:var(--vital);background:var(--vital-soft);border:1px solid #c8e0d4;
+  padding:.35em .8em;border-radius:999px;margin-bottom:1rem;
+}
+.diag__type .role-sub{color:var(--vital-deep);font-weight:700;font-size:.92rem;margin:0 0 .2em;}
+.diag__type h2{font-family:var(--serif);font-weight:900;font-size:clamp(2rem,6vw,2.9rem);margin:.05em 0 .7rem;line-height:1.1;}
+.diag__type p{color:var(--ink-2);font-size:.93rem;line-height:1.95;margin:0;}
+
+.radar{width:100%;max-width:320px;margin:0 auto;display:block;}
+.radar .grid-line{stroke:var(--line-strong);stroke-width:1;fill:none;}
+.radar .ring{stroke:var(--line);stroke-width:1;fill:none;}
+.radar .shape{
+  fill:rgba(31,111,80,.14);stroke:var(--vital);stroke-width:2;stroke-linejoin:round;
+  transform-origin:center;transform:scale(0);opacity:0;
+  transition:transform .9s var(--ease) .15s,opacity .5s ease .15s;
+}
+.radar.drawn .shape{transform:scale(1);opacity:1;}
+.radar .vtx{fill:var(--vital);opacity:0;transition:opacity .4s ease .7s;}
+.radar.drawn .vtx{opacity:1;}
+.radar .axis-label{font-family:var(--sans);font-weight:700;font-size:12px;fill:var(--ink-2);}
+.radar .axis-val{font-family:var(--mono);font-weight:700;font-size:11px;}
+
+.bars{padding:0 clamp(20px,4vw,34px) clamp(22px,4vw,30px);display:flex;flex-direction:column;gap:1rem;}
+.bar .bar__top{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;margin-bottom:.45em;}
+.bar .bar__top .nm{color:var(--ink-2);}
+.bar .bar__top .vl{font-family:var(--mono);color:var(--ink-3);}
+.bar .track{height:7px;border-radius:99px;background:var(--card-2);overflow:hidden;}
+.bar .meter{height:100%;width:0;border-radius:99px;transition:width 1s var(--ease) .3s;}
+
+.section-label{
+  font-size:.74rem;font-weight:700;color:var(--ink-3);letter-spacing:.04em;
+  padding:0 clamp(20px,4vw,34px);margin:.4rem 0 1rem;
+  display:flex;align-items:center;gap:.7em;
+}
+.section-label::before{content:"";width:14px;height:2px;background:var(--vital);}
+
+.week{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:8px;
+  padding:0 clamp(20px,4vw,34px) clamp(22px,4vw,30px);
+}
+.day{
+  border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card);
+  padding:.7rem .4rem;text-align:center;display:flex;flex-direction:column;gap:.45rem;min-height:96px;
+}
+.day .dh{font-family:var(--mono);font-weight:700;font-size:.78rem;color:var(--ink-3);border-bottom:1px solid var(--line);padding-bottom:.4rem;}
+.day .dm{font-size:.7rem;font-weight:700;line-height:1.45;color:var(--ink);}
+.day.rest{background:var(--card-2);}
+.day.rest .dm{color:var(--ink-3);}
+
+.advice{
+  margin:0 clamp(20px,4vw,34px) clamp(22px,4vw,30px);
+  background:var(--vital-soft);border:1px solid #c8e0d4;border-radius:var(--r);
+  padding:clamp(16px,3vw,22px);
+}
+.advice h3{font-size:.78rem;font-weight:700;color:var(--vital-deep);margin:0 0 .6em;display:flex;align-items:center;gap:.5em;}
+.advice p{font-size:.9rem;line-height:1.95;color:var(--ink);margin:0;font-weight:500;}
+
+.disclaimer{
+  padding:0 clamp(20px,4vw,34px) clamp(22px,4vw,30px);
+  font-size:.72rem;line-height:1.8;color:var(--ink-3);
+}
+
+.actions{margin-top:1.6rem;display:flex;gap:.9rem;flex-wrap:wrap;}
+.actions .line-btn{
+  flex:1 1 260px;display:inline-flex;align-items:center;justify-content:center;gap:.6em;
+  background:var(--line-brand);color:#fff;font-weight:700;font-size:1.02rem;
+  border:0;border-radius:var(--r);padding:1.05em 1.4em;
+  box-shadow:0 12px 26px -14px rgba(6,199,85,.9);
+  transition:transform .18s var(--ease),filter .18s;text-decoration:none;
+}
+.actions .line-btn:hover{transform:translateY(-2px);filter:brightness(.97);}
+.actions .line-btn svg{width:22px;height:22px;}
+.actions .sub-row{flex:1 1 100%;display:flex;gap:.9rem;}
+.actions .sub-row .btn-ghost{flex:1;padding:.95em 1em;font-size:.95rem;}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);
+  background:var(--ink);color:#fff;font-size:.85rem;font-weight:500;
+  padding:.8em 1.4em;border-radius:999px;box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:50;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+@media (max-width:680px){
+  .grid2{grid-template-columns:1fr 1fr;}
+  .vitals{grid-template-columns:repeat(3,1fr);}
+  .vitals div:nth-child(4),.vitals div:nth-child(5){border-top:1px solid var(--line);}
+  .diag{grid-template-columns:1fr;}
+  .radar{max-width:260px;}
+  .week{grid-template-columns:repeat(4,1fr);}
+  .opt{max-width:none;}
+}
+@media (max-width:380px){
+  .week{grid-template-columns:repeat(2,1fr);}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+  .enter{opacity:1;transform:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="trace" id="trace"><div class="trace__fill" id="traceFill"></div></div>
+
+  <svg class="ecg" viewBox="0 0 1000 54" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 27 L180 27 L200 27 L210 14 L222 40 L234 27 L420 27 L440 27 L452 8 L466 46 L480 27 L700 27 L720 27 L732 16 L744 38 L756 27 L1000 27" />
+  </svg>
+
+  <main class="stage" id="stage" aria-live="polite"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   State & content (16 Questions Layered for Deep Customization)
+   ========================================================= */
+let userProfile = { age:'', gender:'', height:'', weight:'', habit:'' };
+let currentQuestion = 0;
+let scores = { body:0, stamina:0, mind:0 };
+let answerLog=[];
+
+const questions = [
+  // 1-5: 筋骨格（body）- 満点25点
+  { text:"重い買い物袋や荷物を持ち上げたり、運ぶ作業はあまり苦にならない。", axis:"body", desc:"日常の筋力・パワー" },
+  { text:"少しの段差から飛び降りたり、小走りで踏み込んだりしても足腰に不安はない。", axis:"body", desc:"骨格・関節の安定性" },
+  { text:"階段を上る際、手すりに頼らなくても足にしっかりとした力強さを感じる。", axis:"body", desc:"下半身の出力" },
+  { text:"手すりや机に手をつかずに、椅子から立ち上がることがスムーズにできる。", axis:"body", desc:"下肢筋力・バランス" },
+  { text:"乳製品や小魚・大豆をよく食べ、外に出て日光を浴びる習慣がある。", axis:"body", desc:"骨密度の関連習慣" },
+  
+  // 6-10: 心肺スタミナ（stamina）- 満点25点
+  { text:"早歩きで10分以上歩き続けても、会話ができるくらい息に余裕がある。", axis:"stamina", desc:"有酸素運動の耐性" },
+  { text:"エスカレーターがあっても、意識して階段を使うことが多い。", axis:"stamina", desc:"日常の活動量" },
+  { text:"少し息が上がっても、立ち止まって休めばすぐに呼吸が整う。", axis:"stamina", desc:"心肺機能の回復力" },
+  { text:"平らな道を自分のペースで15分以上続けて歩いても、息が苦しくなることはない。", axis:"stamina", desc:"持久力の耐性" },
+  { text:"休日は家でじっと休むより、外出して動き回っている方が元気に過ごせる。", axis:"stamina", desc:"スタミナの自覚" },
+  
+  // 11-16: 認知・脳状態（mind）- 満点30点
+  { text:"「あれ、何だっけ？」と言葉に詰まることは少なく、すぐ思い出せる。", axis:"mind", desc:"短期記憶・想起" },
+  { text:"料理をしながら片付けをするなど、2つの作業を同時進行するのが得意だ。", axis:"mind", desc:"マルチタスク" },
+  { text:"朝起きたとき頭にモヤモヤ感はなく、スッキリと活動を開始できる。", axis:"mind", desc:"脳の疲労回復" },
+  { text:"新しいゲームのルールや、スマホの新しい使い方を覚えることに抵抗がない。", axis:"mind", desc:"学習意欲と適応力" },
+  { text:"テレビの音が鳴っているような環境でも、本を読んだり人の話を集中して理解できる。", axis:"mind", desc:"注意力・脳の選別能" },
+  { text:"今日が何曜日か、あるいは今年が何年かを、一瞬迷うことなくパッと答えられる。", axis:"mind", desc:"時間・場所の見当識" }
+];
+
+const resultsData = {
+  "HAC":{ title:"トライアスリート", subtitle:"文武両道、タフで聡明な完全無欠タイプ",
+    feature:"筋肉・骨・スタミナのすべてが揃い、頭脳も明晰。ハードな状況にも対応できる「鉄人」です。",
+    menu:{ mon:"高強度インターバル(HIIT)", tue:"アクティブレスト(ヨガ)", wed:"ウェイトトレーニング", thu:"休息日", fri:"新しいスポーツに挑戦", sat:"長距離ランニング", sun:"全身ストレッチ" },
+    advice:"現状の身体能力は非常に高いレベルにあります。更なる向上のため、使ったことのない筋肉を刺激する新しい競技への挑戦をおすすめします。" },
+  "HAN":{ title:"ラグビーフォワード", subtitle:"スタミナとパワーで突き進む切り込み隊長",
+    feature:"体力と突進力は群を抜いていますが、細かいことは気にしないおおらかな気質を持ちます。",
+    menu:{ mon:"有酸素運動(ジョギング)", tue:"筋力トレーニング(体幹)", wed:"休息日", thu:"ステップ運動/エアロビ", fri:"アクティブレスト", sat:"チームスポーツ参加", sun:"脳トレ＋軽い散歩" },
+    advice:"身体のタフさは素晴らしいですが、脳の疲労感に気づきにくい傾向があります。複雑な動きを伴う運動で脳に心地よい刺激を与えましょう。" },
+  "HRC":{ title:"スプリンター", subtitle:"一瞬の爆発力と鋭い戦術で魅せるパワー型",
+    feature:"筋肉の出力が高く頭の回転も速いですが、持久力は長続きしにくいため、短時間で勝負をかけるタイプです。",
+    menu:{ mon:"ダッシュ＆ウォーク", tue:"上半身ウェイト", wed:"完全休息日", thu:"下半身ウェイト", fri:"短時間スイミング", sat:"趣味のアクティビティ", sun:"入念なストレッチ" },
+    advice:"長時間のダラダラとした運動はストレスになります。「短時間で追い込み、しっかり休む」というメリハリのついたサイクルが最適です。" },
+  "HRN":{ title:"ウエイトリフター", subtitle:"無理せず一撃にかける省エネパワー",
+    feature:"骨格や筋力は頑丈ですが、息が上がる運動は苦手。普段は穏やかな省エネモードです。",
+    menu:{ mon:"自体重スクワット", tue:"軽いウォーキング", wed:"休息日", thu:"タオルストレッチ", fri:"ラジオ体操", sat:"軽めの筋力トレ", sun:"リラックスヨガ" },
+    advice:"基礎的な力は十分に備わっています。まずは心肺機能に負担をかけすぎない、ゆっくりとしたペースの全身運動から習慣化しましょう。" },
+  "SAC":{ title:"ミッドフィルダー", subtitle:"抜群のスタミナでスマートに立ち回る司令塔",
+    feature:"体型は華奢ですがスタミナが抜群にあり、広い視野とフットワークの軽さが持ち味です。",
+    menu:{ mon:"プッシュアップ＆腹筋", tue:"ロングジョギング", wed:"アクティブレスト", thu:"下半身強化(ランジ)", fri:"サイクリング", sat:"体幹トレーニング", sun:"休息・マッサージ" },
+    advice:"持久力と頭の回転の速さは完璧です。怪我を防ぐため、筋肉量と骨密度を高める「抗重力トレーニング」を多めに取り入れましょう。" },
+  "SAN":{ title:"ダンサー", subtitle:"リズム感抜群、楽しく動き回るリフレッシュ派",
+    feature:"筋力は控えめですが、スタミナがあり動くのが大好き。のびのびと身体を動かすのが得意です。",
+    menu:{ mon:"ダンス・エアロビクス", tue:"ウォーキング", wed:"休息日", thu:"音楽に合わせて家事", fri:"ピラティス", sat:"ハイキング", sun:"ゆっくり入浴・柔軟" },
+    advice:"「辛いトレーニング」よりも「楽しいアクティビティ」が向いています。音楽を取り入れ、モチベーションを維持しながら基礎体力を養いましょう。" },
+  "SRC":{ title:"ゴルファー", subtitle:"緻密な計算と集中力で勝負する精密機械",
+    feature:"体力勝負より、冷静な分析力と高い集中力で効率よく身体をコントロールする知性派です。",
+    menu:{ mon:"デスクワーク合間ストレッチ", tue:"1回5分のプチ筋トレ", wed:"姿勢改善エクササイズ", thu:"休息日", fri:"ウォーキング", sat:"バランスボール", sun:"マインドフルネス瞑想" },
+    advice:"頭脳労働による首や肩の緊張が懸念されます。激しい運動ではなく、姿勢を正し、血流を改善するためのこまめなストレッチが効果的です。" },
+  "SRN":{ title:"ウォーカー", subtitle:"心地よさを最優先する無理のない脱力系",
+    feature:"激しいスポーツは苦手。お散歩感覚でゆったり心地よく身体を動かすのが合っているマイペース派。",
+    menu:{ mon:"深呼吸と朝ののび", tue:"近所を10分お散歩", wed:"休息日", thu:"湯船にゆっくり浸かる", fri:"寝る前の軽い柔軟", sat:"お出かけ（買い物等）", sun:"完全リラックス" },
+    advice:"今は「運動」と構える必要はありません。まずは日常生活の中で「少し歩く」「深く呼吸する」といった超低負荷な習慣から身体を慣らしましょう。" }
+};
+
+/* =========================================================
+   Render engine (Strict Vanilla Event Binding)
+   ========================================================= */
+const stage = document.getElementById('stage');
+const trace = document.getElementById('trace');
+const traceFill = document.getElementById('traceFill');
+let keyHandler = null;
+
+function render(html, after){
+  stage.classList.add('exit-active');
+  setTimeout(()=>{
+    if(keyHandler){ document.removeEventListener('keydown',keyHandler); keyHandler=null; }
+    stage.scrollTop = 0;
+    stage.innerHTML = html;
+    stage.classList.remove('exit-active');
+    stage.classList.add('enter');
+    requestAnimationFrame(()=>{
+      stage.classList.remove('enter');
+      stage.classList.add('enter-active');
+      if(after) after();
+      setTimeout(()=>stage.classList.remove('enter-active'),520);
+    });
+  },350);
+}
+function setTrace(on,pct){
+  trace.dataset.on = on ? '1':'0';
+  if(pct!=null) traceFill.style.width = pct+'%';
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* =========================================================
+   Screens & Event Injectors
+   ========================================================= */
+function renderStart(){
+  setTrace(false);
+  render(`
+    <div class="center hero">
+      <span class="eyebrow">Physical Type · 身体のサイン</span>
+      <h1 class="hero__title"><span class="l1">あなたの運動タイプを</span><em>計測する</em></h1>
+      <p class="hero__lead">16のディープな問いと基本情報から、筋骨格・心肺・認知の3軸であなたの身体傾向を精密パーソナライズ。年齢層に最適化したバイオメトリクス評価をもとに、<b>今日から始められる1週間の運動調整プラン</b>を構築します。</p>
+      <button class="btn" id="start-btn">診断をはじめる
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <div class="hero__meta">
+        <span><i class="dot"></i>所要 約3分</span>
+        <span><i class="dot"></i>全16問に拡張</span>
+        <span><i class="dot"></i>年齢補正インデックス対応</span>
+      </div>
+    </div>
+  `, () => {
+    document.getElementById('start-btn').addEventListener('click', renderProfile);
+  });
+}
+
+function renderProfile(){
+  setTrace(false);
+  render(`
+    <div class="center" style="max-width:560px;">
+      <div style="margin-bottom:1.2rem;"><button class="linkback" id="back-to-start">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>戻る</button></div>
+      <div class="form-head">
+        <span class="eyebrow">Step 1 · 基本情報</span>
+        <h2>あなたについて教えてください</h2>
+        <p>結果のレポートおよびBMI年齢補正処理に使用します。</p>
+      </div>
+      <form id="pf" class="card" novalidate>
+        <div class="grid2">
+          <div class="field">
+            <label for="p_age">年齢</label>
+            <div class="wrap"><input id="p_age" type="number" inputmode="numeric" min="10" max="120" placeholder="30" required><span class="unit">歳</span></div>
+          </div>
+          <div class="field">
+            <label for="p_gender">性別</label>
+            <div class="wrap"><select id="p_gender" required>
+              <option value="">選択</option><option>男性</option><option>女性</option><option value="回答しない">その他／回答しない</option>
+            </select></div>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="p_height">身長</label>
+            <div class="wrap"><input id="p_height" type="number" inputmode="numeric" min="100" max="250" placeholder="170" required><span class="unit">cm</span></div>
+          </div>
+          <div class="field">
+            <label for="p_weight">体重</label>
+            <div class="wrap"><input id="p_weight" type="number" inputmode="numeric" min="30" max="200" placeholder="65" required><span class="unit">kg</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="p_habit">現在の運動習慣</label>
+          <div class="wrap"><select id="p_habit" required>
+            <option value="">選択してください</option><option>全くなし</option><option value="週1〜2回">週1〜2回程度</option><option value="週3回以上">週3回以上</option>
+          </select></div>
+        </div>
+        <div class="form-foot">
+          <button type="submit" class="btn">診断へ進む
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  `, ()=>{ 
+    document.getElementById('back-to-start').addEventListener('click', renderStart);
+    document.getElementById('pf').addEventListener('submit', submitProfile); 
+  });
+}
+
+function submitProfile(e){
+  e.preventDefault();
+  const f=id=>document.getElementById(id).value.trim();
+  const age=f('p_age'),gender=f('p_gender'),height=f('p_height'),weight=f('p_weight'),habit=f('p_habit');
+  if(!age||!gender||!height||!weight||!habit){ toast('すべての項目を入力してください'); return; }
+  userProfile={age: parseInt(age,10), gender, height: parseFloat(height), weight: parseFloat(weight), habit};
+  currentQuestion=0; scores={body:0,stamina:0,mind:0}; answerLog=[];
+  setTrace(true,0);
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q=questions[currentQuestion];
+  setTrace(true,(currentQuestion/questions.length)*100);
+  const opts=[
+    {v:1,k:'1'},{v:2,k:'2'},{v:3,k:'3'},{v:4,k:'4'},{v:5,k:'5'}
+  ];
+  const labels={1:"全く当てはまらない",2:"あまり当てはまらない",3:"どちらともいえない",4:"やや当てはまる",5:"非常に当てはまる"};
+  
+  render(`
+    <div class="center q-wrap">
+      <div class="q-top">
+        <div class="q-count"><b>${currentQuestion+1}</b><span> / ${questions.length}</span></div>
+        <span class="q-tag">${q.desc}</span>
+      </div>
+      <h2 class="q-text">${q.text}</h2>
+      <div class="scale" role="radiogroup" aria-label="あてはまる度合い">
+        <div class="scale__poles"><span>当てはまらない</span><span>当てはまる</span></div>
+        <div class="scale__row">
+          ${opts.map(o=>`
+            <button type="button" class="opt" data-v="${o.v}" data-axis="${q.axis}" role="radio" aria-checked="false" aria-label="${labels[o.v]}">
+              <span class="opt__key">${o.k}</span>
+            </button>`).join('')}
+        </div>
+        <p class="scale__hint">キーボードの <kbd>1</kbd>〜<kbd>5</kbd> でも回答できます${currentQuestion>0?' ・ <kbd>←</kbd>で前へ戻る':''}</p>
+      </div>
+      <div class="q-foot">
+        ${currentQuestion>0?'<button class="linkback" id="q-back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>前の質問へ</button>':''}
+      </div>
+    </div>
+  `, ()=>{
+    // 各選択肢ボタンへのイベント付与
+    const optButtons = stage.querySelectorAll('.opt');
+    optButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const val = parseInt(this.getAttribute('data-v'), 10);
+        const axis = this.getAttribute('data-axis');
+        answerQuestion(val, axis);
+      });
+    });
+
+    if(currentQuestion > 0) {
+      document.getElementById('q-back-btn').addEventListener('click', goBack);
+    }
+
+    keyHandler=(ev)=>{
+      if(ev.key>='1'&&ev.key<='5'){ answerQuestion(parseInt(ev.key,10),q.axis); }
+      else if(ev.key==='ArrowLeft'&&currentQuestion>0){ goBack(); }
+    };
+    document.addEventListener('keydown',keyHandler);
+  });
+}
+
+function answerQuestion(val,axis){
+  scores[axis]+=val;
+  answerLog.push({axis,val});
+  currentQuestion++;
+  if(currentQuestion<questions.length){ renderQuestion(); }
+  else { setTrace(true,100); renderAnalyzing(); }
+}
+function goBack(){
+  if(currentQuestion===0) return;
+  const last=answerLog.pop();
+  if(last) scores[last.axis]-=last.val;
+  currentQuestion--;
+  renderQuestion();
+}
+
+function renderAnalyzing(){
+  setTrace(true,100);
+  render(`
+    <div class="center analyze">
+      <div class="analyze__ring" role="status" aria-label="集計中"></div>
+      <h2 id="aText">回答を集計しています</h2>
+      <p>16項目の強化プロファイルから多角的に分析中...</p>
+    </div>
+  `, ()=>{
+    setTimeout(()=>{const e=document.getElementById('aText'); if(e) e.textContent='生体年齢補正を適用しています';},1000);
+    setTimeout(()=>{const e=document.getElementById('aText'); if(e) e.textContent='パーソナルレポートを作成しています';},2000);
+    setTimeout(calculateResult,3000);
+  });
+}
+
+function calculateResult(){
+  // 16問への配分変更に伴う閾値の最適化（body5問/stamina5問/mind6問）
+  const b = scores.body    >= 15 ? 'H' : 'S';
+  const a = scores.stamina >= 15 ? 'A' : 'R';
+  const m = scores.mind    >= 18 ? 'C' : 'N';
+  renderReport(`${b}${a}${m}`);
+}
+
+/* radar geometry: Body top, Stamina lower-left, Mind lower-right */
+function radarSVG(){
+  const cx=150,cy=150,R=104;
+  const ang={body:-90,stamina:150,mind:30};
+  // 16問用ノーマライズマッピング（body, staminaは5〜25点、mindは6〜30点）
+  const norm = (s, axis) => {
+    const max = axis === 'mind' ? 30 : 25;
+    const min = axis === 'mind' ? 6 : 5;
+    return Math.max(0, Math.min(1, (s - min) / (max - min)));
+  };
+  const pt=(deg,t)=>{const r=deg*Math.PI/180;return[cx+R*t*Math.cos(r),cy+R*t*Math.sin(r)];};
+  const axisEnd=deg=>{const r=deg*Math.PI/180;return[cx+R*Math.cos(r),cy+R*Math.sin(r)];};
+  
+  let rings='';
+  [0.25,0.5,0.75,1].forEach(t=>{
+    const p=Object.values(ang).map(d=>pt(d,t).join(',')).join(' ');
+    rings+=`<polygon class="ring" points="${p}"/>`;
+  });
+  
+  let axes='';
+  Object.values(ang).forEach(d=>{const e=axisEnd(d);axes+=`<line class="grid-line" x1="${cx}" y1="${cy}" x2="${e[0]}" y2="${e[1]}"/>`;});
+  
+  const sp=[pt(ang.body,norm(scores.body,'body')),pt(ang.stamina,norm(scores.stamina,'stamina')),pt(ang.mind,norm(scores.mind,'mind'))];
+  const shape=`<polygon class="shape" points="${sp.map(p=>p.join(',')).join(' ')}"/>`;
+  const verts=sp.map(p=>`<circle class="vtx" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join('');
+  
+  const lbl=(deg,text,val,color,dy)=>{
+    const r=deg*Math.PI/180;
+    const lx=cx+(R+28)*Math.cos(r), ly=cy+(R+24)*Math.sin(r)+dy;
+    const anchor = deg===-90?'middle':(deg===150?'end':'start');
+    return `<text class="axis-label" x="${lx}" y="${ly}" text-anchor="${anchor}">${text}</text>
+            <text class="axis-val" x="${lx}" y="${ly+14}" text-anchor="${anchor}" fill="${color}">${val}</text>`;
+  };
+
+  return `
+    <svg class="radar" id="radarSvg" viewBox="0 0 300 320" aria-hidden="true">
+      ${rings}${axes}${shape}${verts}
+      ${lbl(ang.body, '筋骨格出力', `${scores.body}/25`, 'var(--axis-body)', -6)}
+      ${lbl(ang.stamina, '心肺スタミナ', `${scores.stamina}/25`, 'var(--axis-stamina)', 0)}
+      ${lbl(ang.mind, '認知・脳状態', `${scores.mind}/30`, 'var(--axis-mind)', 0)}
+    </svg>
+  `;
+}
+
+function renderReport(typeKey){
+  setTrace(false);
+  const data = resultsData[typeKey] || resultsData["SRN"];
+  
+  // 1. BMIの算出
+  const heightM = userProfile.height / 100;
+  const bmi = (userProfile.weight / (heightM * heightM)).toFixed(1);
+  
+  // 2. 厚生労働省基準に基づく「年齢補正適正範囲」の動的決定
+  let minTarget = 18.5, maxTarget = 24.9;
+  let ageGroupStr = "18〜49歳";
+  if (userProfile.age >= 65) {
+    minTarget = 21.5; maxTarget = 24.9; ageGroupStr = "65歳以上";
+  } else if (userProfile.age >= 50) {
+    minTarget = 20.0; maxTarget = 24.9; ageGroupStr = "50〜64歳";
+  }
+
+  // 3. BMIステータス判定とビジュアルバー用シフティング比率の計算（下限12〜上限35の幅でマッピング）
+  let bmiStatus = "適正体重";
+  let feedbackClass = "var(--vital)";
+  let pinPercent = ((bmi - 12) / (35 - 12)) * 100;
+  pinPercent = Math.max(3, Math.min(97, pinPercent)); // 表示が潰れないためのガード
+
+  if (bmi < minTarget) {
+    bmiStatus = "低体重 (やせ傾向)";
+    feedbackClass = "var(--axis-mind)";
+  } else if (bmi > maxTarget) {
+    if (bmi >= 30) {
+      bmiStatus = "肥満 (高度)";
+      feedbackClass = "var(--signal)";
+    } else {
+      bmiStatus = "過体重 (肥満気味)";
+      feedbackClass = "var(--axis-body)";
+    }
+  }
+
+  let weekHtml = '';
+  const dayNames = { mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', sun:'Sun' };
+  const dayLabelsJa = { mon:'月', tue:'火', wed:'水', thu:'木', fri:'金', sat:'土', sun:'Sun' };
+  
+  for(const [d, task] of Object.entries(data.menu)){
+    const isRest = task.includes("休息") || task.includes("リラックス");
+    weekHtml += `
+      <div class="day ${isRest?'rest':''}">
+        <span class="dh">${dayNames[d]}</span>
+        <span class="dm">${task}</span>
+      </div>`;
+  }
+
+  // プロファイルバー表示用（16問用にパーセンテージ換算）
+  const bodyPct = (scores.body / 25) * 100;
+  const stamPct = (scores.stamina / 25) * 100;
+  const mindPct = (scores.mind / 30) * 100;
+
+  render(`
+    <div class="report enter">
+      <div class="sheet">
+        <div class="sheet__head">
+          <div>
+            <span class="sub">FITNESS BIOMETRICS REPORT</span>
+            <h1>運動特性評価書</h1>
+          </div>
+          <div class="sheet__meta-r">
+            年齢: ${userProfile.age} 歳 (${ageGroupStr})<br>
+            性別: ${userProfile.gender} / 習慣: ${userProfile.habit}
+          </div>
+        </div>
+
+        <div class="vitals">
+          <div><span class="k">HEIGHT</span><div class="v">${userProfile.height}<small>cm</small></div></div>
+          <div><span class="k">WEIGHT</span><div class="v">${userProfile.weight}<small>kg</small></div></div>
+          <div><span class="k">BODY-SCORE</span><div class="v">${scores.body}<small>/25</small></div></div>
+          <div><span class="k">STAMINA-SCORE</span><div class="v">${scores.stamina}<small>/25</small></div></div>
+          <div><span class="k">MIND-SCORE</span><div class="v">${scores.mind}<small>/30</small></div></div>
+        </div>
+
+        <div class="bmi-section">
+          <div class="bmi-label-container">
+            <span class="bmi-title">生体組成解析 ｜ 年齢補正BMIインデックス (${ageGroupStr}の目標: ${minTarget}〜${maxTarget})</span>
+            <span class="bmi-value-display">BMI ${bmi} <small style="font-size:0.8rem; font-weight:700; color:${feedbackClass};">［${bmiStatus}］</small></span>
+          </div>
+          <div class="bmi-gauge-wrapper">
+            <div class="bmi-bar-track"></div>
+            <div class="bmi-pin-indicator" style="left: ${pinPercent}%;">
+              <div class="bmi-pin-dot"></div>
+              <div class="bmi-pin-lbl" style="background:${feedbackClass};">あなた: ${bmi}</div>
+            </div>
+          </div>
+          <div class="bmi-bar-labels">
+            <span>やせ (18.5未満)</span>
+            <span style="color:var(--vital-deep);">■ 適正範囲 (${minTarget}〜${maxTarget})</span>
+            <span>肥満気味 (25以上)</span>
+            <span>高度肥満 (30以上)</span>
+          </div>
+        </div>
+
+        <div class="diag">
+          <div class="diag__type">
+            <span class="chip">TYPE: ${typeKey}</span>
+            <p class="role-sub">${data.subtitle}</p>
+            <h2>${data.title}</h2>
+            <p>${data.feature}</p>
+          </div>
+          <div>
+            ${radarSVG()}
+          </div>
+        </div>
+
+        <span class="section-label">3軸能力ボリューム</span>
+        <div class="bars">
+          <div class="bar">
+            <div class="bar__top"><span class="nm">筋骨格系出力 (筋力・関節負荷耐性)</span><span class="vl">${scores.body} / 25</span></div>
+            <div class="track"><div class="meter" id="b-bar" style="background:var(--axis-body);"></div></div>
+          </div>
+          <div class="bar">
+            <div class="bar__top"><span class="nm">心肺スタミナ系 (持続力・酸素効率)</span><span class="vl">${scores.stamina} / 25</span></div>
+            <div class="track"><div class="meter" id="s-bar" style="background:var(--axis-stamina);"></div></div>
+          </div>
+          <div class="bar">
+            <div class="bar__top"><span class="nm">認知・神経系 (反応・マルチタスク調整)</span><span class="vl">${scores.mind} / 30</span></div>
+            <div class="track"><div class="meter" id="m-bar" style="background:var(--axis-mind);"></div></div>
+          </div>
+        </div>
+
+        <span class="section-label">あなた専用の週間調整最適化スケジュール</span>
+        <div class="week">
+          ${weekHtml}
+        </div>
+
+        <div class="advice">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            ガイダンスアドバイス
+          </h3>
+          <p>
+            あなたの年齢層における目標適正値に照らし合わせた結果、現在は<strong>【${bmiStatus}】</strong>の指標を示しています。これに基づき、${data.advice}
+          </p>
+        </div>
+
+        <div class="disclaimer">
+          ※本診断は、ユーザーから提供された主観的な応答ログと基本体型インデックスに基づく動的モデリングであり、医療上の診断に代わるものではありません。新しい高負荷運動を開始する際は、ご自身の体調に合わせて調整してください。
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="https://line.me/" target="_blank" rel="noopener" class="line-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.121.303.079.778.039 1.084l-.171 1.027c-.052.311-.252 1.217 1.089.664 1.341-.553 7.235-4.259 9.871-7.294 1.925-2.201 3.078-4.646 3.078-7.711zm-15.54 3.238c0 .252-.204.456-.456.456h-2.144c-.252 0-.456-.204-.456-.456v-4.573c0-.252.204-.456.456-.456h.456c.252 0 .456.204.456.456v1.659h1.232c.252 0 .456.204.456.456v.456c0 .252-.204.456-.456.456h-1.232v1.546h1.232c.252 0 .456.204.456.456v.456zm3.192 0c0 .252-.204.456-.456.456h-.456c-.252 0-.456-.204-.456-.456v-4.573c0-.252.204-.456.456-.456h.456c.252 0 .456.204.456.456v4.573zm4.551-.456c0 .252-.204.456-.456.456h-.475c-.171 0-.324-.095-.4-.247l-1.745-3.376v3.167c0 .252-.204.456-.456.456h-.456c-.252 0-.456-.204-.456-.456v-4.573c0-.252.204-.456.456-.456h.475c.171 0 .324.095.4.247l1.745 3.376v-3.167c0-.252.204-.456.456-.456h.456c.252 0 .456.204.456.456v4.573zm3.192-2.286v.456c0 .252-.204.456-.456.456h-1.232v.633h1.232c.252 0 .456.204.456.456v.456c0 .252-.204.456-.456.456h-2.144c-.252 0-.456-.204-.456-.456v-4.573c0-.252.204-.456.456-.456h2.144c-.252 0 .456.204.456.456v.456c0 .252-.204.456-.456.456h-1.232v.634h1.232c.252 0 .456.204.456.456z"/></svg>
+          この調整プランをLINEに保存する
+        </a>
+        <div class="sub-row">
+          <button class="btn btn-ghost" id="copy-report-btn">結果をクリップボードにコピー</button>
+          <button class="btn btn-ghost" id="restart-diagnostic-btn">再計測を行う</button>
+        </div>
+      </div>
+    </div>
+  `, ()=>{
+    // アニメーション用クラスインジェクション
+    setTimeout(()=>{
+      const r = document.getElementById('radarSvg');
+      if(r) r.classList.add('drawn');
+      
+      const bBar = document.getElementById('b-bar'); if(bBar) bBar.style.width = bodyPct+'%';
+      const sBar = document.getElementById('s-bar'); if(sBar) sBar.style.width = stamPct+'%';
+      const mBar = document.getElementById('m-bar'); if(mBar) mBar.style.width = mindPct+'%';
+    }, 100);
+
+    // 各種アクションボタンへのリスナー紐付け
+    document.getElementById('restart-diagnostic-btn').addEventListener('click', renderStart);
+    document.getElementById('copy-report-btn').addEventListener('click', () => {
+      const text = `【運動タイプ診断結果】\nタイプ: ${typeKey} - ${data.title}\nBMI: ${bmi} (${bmiStatus})`;
+      navigator.clipboard.writeText(text).then(() => toast('結果をクリップボードにコピーしました'));
+    });
+  });
+}
+
+// 初期化（アプリケーション起動）
+document.addEventListener('DOMContentLoaded', renderStart);
+</script>
+</body>
+</html>
