@@ -31,13 +31,12 @@
   --vital-deep:#15543c;
   --vital-soft:#e3efe9;
   --signal:#d8593b;         /* sparing warm signal / pulse */
+  --warn-light:#fdf3f0;
 
   /* axis hues (muted, harmonise on paper) */
   --axis-body:#b07a2e;      /* 筋骨格 ochre */
   --axis-stamina:#1f6f50;   /* 心肺 green */
   --axis-mind:#5b5ba6;      /* 認知 indigo */
-
-  --line-brand:#06c755;     /* LINE */
 
   /* type */
   --serif:"Zen Old Mincho",serif;
@@ -152,6 +151,8 @@ button{font-family:inherit;cursor:pointer;}
 .btn-ghost{
   background:transparent;color:var(--ink-2);border:1.5px solid var(--line-strong);
   box-shadow:none;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+  padding:1em 1.8em;border-radius:999px;transition:all .18s;
 }
 .btn-ghost:hover{background:var(--card-2);color:var(--ink);transform:translateY(-1px);}
 
@@ -304,7 +305,7 @@ button{font-family:inherit;cursor:pointer;}
 .vitals .v small{font-size:.7rem;font-weight:500;color:var(--ink-3);}
 
 .diag{
-  display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(20px,4vw,40px);
+  display:grid;grid-template-columns:1.1fr 0.9fr;gap:clamp(20px,4vw,40px);
   padding:clamp(22px,4vw,36px);align-items:center;
 }
 .diag__type .chip{
@@ -313,23 +314,44 @@ button{font-family:inherit;cursor:pointer;}
   padding:.35em .8em;border-radius:999px;margin-bottom:1rem;
 }
 .diag__type .role-sub{color:var(--vital-deep);font-weight:700;font-size:.92rem;margin:0 0 .2em;}
-.diag__type h2{font-family:var(--serif);font-weight:900;font-size:clamp(2rem,6vw,2.9rem);margin:.05em 0 .7rem;line-height:1.1;}
+.diag__type h2{font-family:var(--serif);font-weight:900;font-size:clamp(2rem,5vw,2.7rem);margin:.05em 0 .7rem;line-height:1.18;}
 .diag__type p{color:var(--ink-2);font-size:.93rem;line-height:1.95;margin:0;}
 
-/* radar */
-.radar{width:100%;max-width:320px;margin:0 auto;display:block;}
+/* radar chart container & responsive fix */
+.radar-wrap{position:relative;width:100%;max-width:320px;margin:0 auto;padding:10px;}
+.radar{width:100%;height:auto;display:block;overflow:visible;}
 .radar .grid-line{stroke:var(--line-strong);stroke-width:1;fill:none;}
 .radar .ring{stroke:var(--line);stroke-width:1;fill:none;}
 .radar .shape{
-  fill:rgba(31,111,80,.14);stroke:var(--vital);stroke-width:2;stroke-linejoin:round;
-  transform-origin:center;transform:scale(0);opacity:0;
+  fill:rgba(31,111,80,.14);stroke:var(--vital);stroke-width:2.5;stroke-linejoin:round;
+  transform-origin:160px 160px;transform:scale(0);opacity:0;
   transition:transform .9s var(--ease) .15s,opacity .5s ease .15s;
 }
 .radar.drawn .shape{transform:scale(1);opacity:1;}
 .radar .vtx{fill:var(--vital);opacity:0;transition:opacity .4s ease .7s;}
 .radar.drawn .vtx{opacity:1;}
-.radar .axis-label{font-family:var(--sans);font-weight:700;font-size:12px;fill:var(--ink-2);}
-.radar .axis-val{font-family:var(--mono);font-weight:700;font-size:11px;}
+.radar .axis-label{font-family:var(--sans);font-weight:700;font-size:12px;fill:var(--ink);}
+
+/* BMI Section & Graph Component */
+.bmi-box{
+  margin:0 clamp(20px,4vw,34px) clamp(22px,4vw,30px);
+  background:var(--card-2);border:1px solid var(--line);border-radius:var(--r);
+  padding:clamp(16px,3vw,24px);
+}
+.bmi-metrics{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1rem;}
+.bmi-title{font-size:.9rem;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:.5em;}
+.bmi-status{font-size:.85rem;font-weight:700;padding:.2em .7em;border-radius:4px;}
+.bmi-status.normal{background:var(--vital-soft);color:var(--vital-deep);}
+.bmi-status.warn{background:var(--warn-light);color:var(--signal);}
+
+.bmi-graph-container{position:relative;margin:2rem 0 1rem;padding-top:15px;}
+.bmi-bar{height:12px;border-radius:99px;background:linear-gradient(90deg, #5b5ba6 0%, #a2c2b3 25%, var(--vital) 40%, var(--vital) 65%, #e0a394 80%, var(--signal) 100%);position:relative;}
+.bmi-guide-zone{position:absolute;top:-4px;height:20px;border-left:2px dashed rgba(23,32,25,.4);border-right:2px dashed rgba(23,32,25,.4);background:rgba(31,111,80,.06);pointer-events:none;}
+.bmi-pointer{position:absolute;top:-14px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;z-index:2;transition:left 1s var(--ease);}
+.bmi-pointer .val{font-family:var(--mono);font-weight:700;font-size:.85rem;color:var(--ink);background:#fff;padding:1px 5px;border:1px solid var(--line-strong);border-radius:4px;box-shadow:var(--shadow-sm);margin-bottom:2px;}
+.bmi-pointer .pin{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--ink);}
+.bmi-labels{display:flex;justify-content:between;font-family:var(--mono);font-size:.68rem;color:var(--ink-3);margin-top:.6em;position:relative;}
+.bmi-guide-text{font-size:.78rem;color:var(--ink-2);line-height:1.6;margin:0;}
 
 .bars{padding:0 clamp(20px,4vw,34px) clamp(22px,4vw,30px);display:flex;flex-direction:column;gap:1rem;}
 .bar .bar__top{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;margin-bottom:.45em;}
@@ -372,18 +394,7 @@ button{font-family:inherit;cursor:pointer;}
 }
 
 /* report actions */
-.actions{margin-top:1.6rem;display:flex;gap:.9rem;flex-wrap:wrap;}
-.actions .line-btn{
-  flex:1 1 260px;display:inline-flex;align-items:center;justify-content:center;gap:.6em;
-  background:var(--line-brand);color:#fff;font-weight:700;font-size:1.02rem;
-  border:0;border-radius:var(--r);padding:1.05em 1.4em;
-  box-shadow:0 12px 26px -14px rgba(6,199,85,.9);
-  transition:transform .18s var(--ease),filter .18s;text-decoration:none;
-}
-.actions .line-btn:hover{transform:translateY(-2px);filter:brightness(.97);}
-.actions .line-btn svg{width:22px;height:22px;}
-.actions .sub-row{flex:1 1 100%;display:flex;gap:.9rem;}
-.actions .sub-row .btn-ghost{flex:1;padding:.95em 1em;font-size:.95rem;}
+.actions{margin-top:1.6rem;display:flex;justify-content:center;gap:.9rem;padding:0 4px;}
 
 .toast{
   position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);
@@ -398,7 +409,7 @@ button{font-family:inherit;cursor:pointer;}
   .vitals{grid-template-columns:repeat(3,1fr);}
   .vitals div:nth-child(4),.vitals div:nth-child(5){border-top:1px solid var(--line);}
   .diag{grid-template-columns:1fr;}
-  .radar{max-width:260px;}
+  .radar-wrap{max-width:280px;}
   .week{grid-template-columns:repeat(4,1fr);}
   .opt{max-width:none;}
 }
@@ -431,6 +442,7 @@ button{font-family:inherit;cursor:pointer;}
 let userProfile = { age:'', gender:'', height:'', weight:'', habit:'' };
 let currentQuestion = 0;
 let scores = { body:0, stamina:0, mind:0 };
+let answerLog=[];
 
 const questions = [
   { text:"重い買い物袋や荷物を運ぶ作業は、あまり苦にならない。", axis:"body", desc:"日常の筋力・パワー" },
@@ -594,7 +606,7 @@ function submitProfile(e){
   const age=f('p_age'),gender=f('p_gender'),height=f('p_height'),weight=f('p_weight'),habit=f('p_habit');
   if(!age||!gender||!height||!weight||!habit){ toast('すべての項目を入力してください'); return; }
   userProfile={age,gender,height,weight,habit};
-  currentQuestion=0; scores={body:0,stamina:0,mind:0};
+  currentQuestion=0; scores={body:0,stamina:0,mind:0}; answerLog=[];
   setTrace(true,0);
   renderQuestion();
 }
@@ -637,7 +649,6 @@ function renderQuestion(){
   });
 }
 
-let answerLog=[];
 function answerQuestion(val,axis){
   scores[axis]+=val;
   answerLog.push({axis,val});
@@ -675,137 +686,140 @@ function calculateResult(){
   renderReport(`${b}${a}${m}`);
 }
 
-/* radar geometry: Body top, Stamina lower-left, Mind lower-right */
+/* =========================================================
+   Radar SVG Generator (Fixed & Complete)
+   ========================================================= */
 function radarSVG(){
-  const cx=150,cy=150,R=104;
-  const ang={body:-90,stamina:150,mind:30};
-  const norm=s=>Math.max(0,Math.min(1,(s-4)/16));
-  const pt=(deg,t)=>{const r=deg*Math.PI/180;return[cx+R*t*Math.cos(r),cy+R*t*Math.sin(r)];};
-  const axisEnd=deg=>{const r=deg*Math.PI/180;return[cx+R*Math.cos(r),cy+R*Math.sin(r)];};
-  // rings
+  const cx=160, cy=160, R=100;
+  const ang={body:-90, stamina:150, mind:30};
+  
+  // Normalize scores (Min:4, Max:20)
+  const norm=s=>Math.max(0.1, Math.min(1, (s-4)/16));
+  const pt=(deg,t)=>{
+    const r=deg*Math.PI/180;
+    return [cx+R*t*Math.cos(r), cy+R*t*Math.sin(r)];
+  };
+  
+  // Concentric background rings
   let rings='';
-  [0.25,0.5,0.75,1].forEach(t=>{
+  [0.25, 0.5, 0.75, 1].forEach(t=>{
     const p=Object.values(ang).map(d=>pt(d,t).join(',')).join(' ');
     rings+=`<polygon class="ring" points="${p}"/>`;
   });
-  // axes
+  
+  // Axis grid lines
   let axes='';
-  Object.values(ang).forEach(d=>{const e=axisEnd(d);axes+=`<line class="grid-line" x1="${cx}" y1="${cy}" x2="${e[0]}" y2="${e[1]}"/>`;});
-  // shape
-  const sp=[pt(ang.body,norm(scores.body)),pt(ang.stamina,norm(scores.stamina)),pt(ang.mind,norm(scores.mind))];
+  Object.values(ang).forEach(d=>{
+    const e=pt(d,1);
+    axes+=`<line class="grid-line" x1="${cx}" y1="${cy}" x2="${e[0]}" y2="${e[1]}"/>`;
+  });
+  
+  // User shape polygon
+  const sp=[pt(ang.body,norm(scores.body)), pt(ang.stamina,norm(scores.stamina)), pt(ang.mind,norm(scores.mind))];
   const shape=`<polygon class="shape" points="${sp.map(p=>p.join(',')).join(' ')}"/>`;
-  const verts=sp.map(p=>`<circle class="vtx" cx="${p[0]}" cy="${p[1]}" r="4"/>`).join('');
-  // labels
-  const lbl=(deg,text,val,color,dy)=>{const e=axisEnd(deg);const r=deg*Math.PI/180;
-    const lx=cx+(R+24)*Math.cos(r),ly=cy+(R+24)*Math.sin(r);
-    return `<text class="axis-label" x="${lx}" y="${ly+dy}" text-anchor="middle">${text}</text>
-            <text class="axis-val" x="${lx}" y="${ly+dy+15}" text-anchor="middle" fill="${color}">${val}</text>`;};
-  const labels=
-    lbl(-90,'筋骨格',scores.body,'#b07a2e',-6)+
-    lbl(150,'心肺',scores.stamina,'#1f6f50',6)+
-    lbl(30,'認知',scores.mind,'#5b5ba6',6);
-  return `<svg class="radar" id="radar" viewBox="0 0 300 300" role="img" aria-label="3軸スコアのレーダーチャート">
-    ${rings}${axes}${shape}${verts}${labels}</svg>`;
+  const verts=sp.map(p=>`<circle class="vtx" cx="${p[0]}" cy="${p[1]}" r="4.5"/>`).join('');
+  
+  // Label placement (offset to avoid truncation)
+  const l_body = pt(ang.body, 1.25);
+  const l_stam = pt(ang.stamina, 1.3);
+  const l_mind = pt(ang.mind, 1.3);
+  
+  const labels=`
+    <text class="axis-label" x="${l_body[0]}" y="${l_body[1]}" text-anchor="middle">筋骨格</text>
+    <text class="axis-label" x="${l_stam[0]}" y="${l_stam[1]+4}" text-anchor="end">心肺</text>
+    <text class="axis-label" x="${l_mind[0]}" y="${l_mind[1]+4}" text-anchor="start">認知</text>
+  `;
+  
+  return `<svg class="radar" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">${rings}${axes}${shape}${verts}${labels}</svg>`;
 }
 
-function renderReport(key){
+/* =========================================================
+   Report Renderer
+   ========================================================= */
+function renderReport(type){
   setTrace(false);
-  const d=resultsData[key];
-  const hM=userProfile.height/100;
-  const bmi=(userProfile.weight/(hM*hM)).toFixed(1);
-  const date=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'});
-  const id=Math.floor(Math.random()*1e8).toString().padStart(8,'0');
-  const barColor={body:'var(--axis-body)',stamina:'var(--axis-stamina)',mind:'var(--axis-mind)'};
-  const dayMap={月:'mon',火:'tue',水:'wed',木:'thu',金:'fri',土:'sat',日:'sun'};
+  const res = resultsData[type] || resultsData["SRN"];
+  
+  // Calculations for BMI
+  const hM = parseFloat(userProfile.height) / 100;
+  const wK = parseFloat(userProfile.weight);
+  const bmi = (wK / (hM * hM)).toFixed(1);
+  const age = parseInt(userProfile.age, 10);
+  
+  // Age-adjusted BMI guidelines (Ministry of Health, Labour and Welfare Japan)
+  let bmiMin = 18.5, bmiMax = 24.9;
+  if(age >= 50 && age <= 64) { bmiMin = 20.0; }
+  else if(age >= 65) { bmiMin = 21.5; }
+  
+  let bmiStatusText = "目標範囲内（適切）";
+  let bmiClass = "normal";
+  if(bmi < bmiMin) { bmiStatusText = "低体重（痩せすぎ）"; bmiClass = "warn"; }
+  else if(bmi > bmiMax) { bmiStatusText = "肥満（太りすぎ）"; bmiClass = "warn"; }
+  
+  // Percent positioning on scale bar (Range 15 to 33)
+  const barMin = 15, barMax = 33;
+  const pointerPct = Math.max(0, Math.min(100, ((bmi - barMin) / (barMax - barMin)) * 100));
+  const zoneLeft = ((bmiMin - barMin) / (barMax - barMin)) * 100;
+  const zoneWidth = ((bmiMax - bmiMin) / (barMax - barMin)) * 100;
+  
+  const todayStr = new Date().toLocaleDateString('ja-JP', {year:'numeric', month:'2-digit', day:'2-digit'}).replace(/\//g, '.');
 
   render(`
-    <div class="center report">
-      <div class="sheet" id="sheet">
+    <div class="report enter-active">
+      <div class="sheet">
         <div class="sheet__head">
           <div>
-            <span class="sub">PHYSICAL TYPE REPORT</span>
-            <h1>運動タイプ診断レポート</h1>
+            <span class="sub">PHYSICAL ASSESSMENT REPORT</span>
+            <h1>運動タイプ診断 結果レポート</h1>
           </div>
-          <div class="sheet__meta-r">発行日 ${date}<br>ID ${id}</div>
+          <div class="sheet__meta-r">
+            ID: ANONYMOUS<br>DATE: ${todayStr}
+          </div>
         </div>
-
+        
         <div class="vitals">
-          <div><div class="k">年齢</div><div class="v">${userProfile.age}<small> 歳</small></div></div>
-          <div><div class="k">性別</div><div class="v" style="font-family:var(--sans)">${userProfile.gender}</div></div>
-          <div><div class="k">身長</div><div class="v">${userProfile.height}<small> cm</small></div></div>
-          <div><div class="k">体重</div><div class="v">${userProfile.weight}<small> kg</small></div></div>
-          <div><div class="k">BMI</div><div class="v">${bmi}</div></div>
+          <div><span class="k">年齢</span><div class="v">${userProfile.age}<small> 歳</small></div></div>
+          <div><span class="k">性別</span><div class="v" style="font-size:1.05rem; margin-top:0.3em;">${userProfile.gender}</div></div>
+          <div><span class="k">身長</span><div class="v">${userProfile.height}<small> cm</small></div></div>
+          <div><span class="k">体重</span><div class="v">${userProfile.weight}<small> kg</small></div></div>
+          <div><span class="k">運動習慣</span><div class="v" style="font-size:1.05rem; margin-top:0.3em;">${userProfile.habit}</div></div>
         </div>
-
+        
         <div class="diag">
           <div class="diag__type">
-            <span class="chip">TYPE · ${key}</span>
-            <p class="role-sub">${d.subtitle}</p>
-            <h2>${d.title}</h2>
-            <p>${d.feature}</p>
+            <span class="chip">TYPE: ${type}</span>
+            <p class="role-sub">${res.subtitle}</p>
+            <h2>${res.title}</h2>
+            <p>${res.feature}</p>
           </div>
-          <div>${radarSVG()}</div>
+          <div class="radar-wrap">
+            ${radarSVG()}
+          </div>
+        </div>
+        
+        <div class="bars">
+          <div class="bar">
+            <div class="bar__top"><span class="nm">筋骨格力（骨・関節・体幹）</span><span class="vl">${scores.body} / 20</span></div>
+            <div class="track"><div class="meter" style="width:${(scores.body/20)*100}%; background:var(--axis-body);"></div></div>
+          </div>
+          <div class="bar">
+            <div class="bar__top"><span class="nm">心肺持久力（スタミナ・回復力）</span><span class="vl">${scores.stamina} / 20</span></div>
+            <div class="track"><div class="meter" style="width:${(scores.stamina/20)*100}%; background:var(--axis-stamina);"></div></div>
+          </div>
+          <div class="bar">
+            <div class="bar__top"><span class="nm">認知適応力（マルチタスク・脳疲労）</span><span class="vl">${scores.mind} / 20</span></div>
+            <div class="track"><div class="meter" style="width:${(scores.mind/20)*100}%; background:var(--axis-mind);"></div></div>
+          </div>
         </div>
 
-        <div class="bars" id="bars">
-          ${[['body','筋骨格','スタミナを支える土台'],['stamina','心肺','動き続けるための持久力'],['mind','認知','頭のキレと集中力']].map(([ax,nm])=>`
-            <div class="bar">
-              <div class="bar__top"><span class="nm">${nm}</span><span class="vl">${scores[ax]} / 20</span></div>
-              <div class="track"><div class="meter" data-w="${(scores[ax]/20)*100}" style="background:${barColor[ax]}"></div></div>
-            </div>`).join('')}
-        </div>
-
-        <div class="section-label">推奨される1週間の運動プラン</div>
-        <div class="week">
-          ${Object.entries(dayMap).map(([jp,en])=>{
-            const m=d.menu[en];const rest=/休息|完全リラックス/.test(m);
-            return `<div class="day${rest?' rest':''}"><div class="dh">${jp}</div><div class="dm">${m}</div></div>`;
-          }).join('')}
-        </div>
-
-        <div class="advice">
-          <h3>あなたへのアドバイス</h3>
-          <p>${d.advice}</p>
-        </div>
-
-        <p class="disclaimer">※ 本レポートは医療上の診断ではなく、運動習慣づくりの参考情報です。持病・既往症のある方、体調に不安のある方は、運動を始める前に医師にご相談ください。</p>
-      </div>
-
-      <div class="actions">
-        <a class="line-btn" href="https://lin.ee/YOUR_LINE_LINK_HERE" target="_blank" rel="noopener">
-          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.049.775.021 1.086l-.168 1.026c-.022.138-.105.441.424.218.529-.223 2.855-1.682 5.097-3.766 2.37-2.222 3.533-4.402 3.533-8.764z"/></svg>
-          LINEで毎日のメニューを受け取る
-        </a>
-        <div class="sub-row">
-          <button class="btn-ghost" onclick="shareResult('${d.title}','${key}')">結果をシェア</button>
-          <button class="btn-ghost" onclick="restart()">最初からやり直す</button>
-        </div>
-      </div>
-    </div>
-  `, ()=>{
-    requestAnimationFrame(()=>{
-      const radar=document.getElementById('radar'); if(radar) radar.classList.add('drawn');
-      document.querySelectorAll('#bars .meter').forEach(el=>{el.style.width=el.dataset.w+'%';});
-    });
-  });
-}
-
-async function shareResult(title,key){
-  const text=`私の運動タイプは「${title}型」(${key})でした！あなたのタイプも診断してみよう。`;
-  const url=location.href;
-  if(navigator.share){
-    try{ await navigator.share({title:'運動タイプ診断',text,url}); return; }catch(e){ if(e.name==='AbortError') return; }
-  }
-  try{ await navigator.clipboard.writeText(text+' '+url); toast('結果をコピーしました'); }
-  catch(e){ toast('シェアに対応していません'); }
-}
-function restart(){
-  userProfile={age:'',gender:'',height:'',weight:'',habit:''};
-  currentQuestion=0; scores={body:0,stamina:0,mind:0}; answerLog=[];
-  renderStart();
-}
-
-renderStart();
-</script>
-</body>
-</html>
+        <span class="section-label">体格組成（年齢補正基準）</span>
+        <div class="bmi-box">
+          <div class="bmi-metrics">
+            <span class="bmi-title">現在のBMI： <strong>${bmi}</strong></span>
+            <span class="bmi-status ${bmiClass}">${bmiStatusText}</span>
+          </div>
+          
+          <div class="bmi-graph-container">
+            <div class="bmi-bar">
+              <div class="bmi-guide-zone" style="left:${zoneLeft}%; width:${zoneWidth}%;"></div>
+              <div class="bmi-pointer" style="left
